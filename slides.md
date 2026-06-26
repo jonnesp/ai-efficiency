@@ -2,7 +2,7 @@
 theme: seriph
 title: IA com Eficiência
 info: |
-  Como evitar ficar sem tokens — usando a IA como engenharia, não como sorte.
+  Obtendo o máximo de eficiencia no uso de tokens — IA como engenharia.
 class: text-center
 transition: slide-left
 mdc: true
@@ -10,7 +10,7 @@ mdc: true
 
 # IA com Eficiência 🧠⚡
 
-Como evitar ficar sem tokens — e usar a IA como engenharia, não como sorte
+Obtendo o máximo de eficiencia no uso de tokens — IA como engenharia.
 
 <div class="pt-12 opacity-70">
   Apresentação para o time · 1h
@@ -27,7 +27,7 @@ transition: fade-out
 
 # O problema
 
-A IA é incrível... até acabar no meio do mês.
+A IA é incrível... porém o uso pode ser bem caro e como todos sabemos limitado.
 
 <v-clicks>
 
@@ -71,7 +71,7 @@ layout: section
 
 # 1. Como os tokens são gastos de verdade
 
-O modelo mental que destrava todo o resto
+O contexto é reenviado a cada turno — todo o resto decorre disso
 
 ---
 
@@ -100,6 +100,89 @@ flowchart LR
 
 ---
 
+# Nem todo token custa igual
+
+O `/usage` separa quatro tipos. Os preços abaixo usam o Sonnet 4.6 como base:
+
+<div class="text-sm">
+
+| Tipo | O que é | Custo | $/MTok |
+|---|---|---|---|
+| **Cache read** | reler contexto já cacheado | **0,1×** | $0,30 |
+| **Input** | tokens novos, 1ª vez | 1× (base) | $3,00 |
+| **Cache write** | gravar contexto no cache | 1,25× | $3,75 |
+| **Output** | tokens que o modelo **gera** | 5× | $15,00 |
+
+</div>
+
+<v-click>
+
+<div class="pt-4 text-center text-xl">
+
+O cache é o que torna o reenvio do contexto viável: reler custa **1/10**.<br/>
+Mas atenção ao volume — numa sessão longa, o cache read relê **tudo, a cada turno**.
+
+</div>
+
+</v-click>
+
+---
+
+# Caso real — esta própria apresentação
+
+Construí estes slides conversando e ajustando com a IA. Muitas iterações na mesma sessão → o `slides.md` crescia e era **relido a cada turno**.
+
+<div class="grid grid-cols-2 gap-6 pt-4">
+
+<div>
+
+### O que apareceu no `/usage`
+
+```
+Sonnet 4.6
+  input:        8,2k
+  output:      24,3k
+  cache write: 77,1k
+  cache read:   4,6M   ← !
+  -----------------------
+  custo:       $2,23
+```
+
+</div>
+
+<div v-click>
+
+### Para onde foi o dinheiro
+
+```
+cache read:  4,6M × $0,30 = $1,38
+output:     24,3k × $15    = $0,36
+cache write: 77,1k × $3,75 = $0,29
+input:        8,2k × $3    = $0,02
+```
+
+<div class="pt-2 text-sm opacity-80">
+
+O maior item não foi o output — foi **reler o contexto**, turno após turno.
+
+</div>
+
+</div>
+
+</div>
+
+<v-click>
+
+<div class="pt-4 text-center text-xl">
+
+Cada ajuste de slide custava reler tudo de novo. É o argumento do `/clear` e do contexto enxuto — em números reais.
+
+</div>
+
+</v-click>
+
+---
+
 # O "imposto da redescoberta"
 
 Sem contexto persistente, o agente **paga pedágio** toda vez que toca no projeto:
@@ -122,6 +205,7 @@ Sem contexto persistente, o agente **paga pedágio** toda vez que toca no projet
 - já sabe o que é o projeto
 - já sabe onde as coisas estão
 - já conhece as convenções
+- já sabe o que **não pode fazer** no ambiente (ex.: sem `sudo` no devcontainer — não tenta, não entra em loop de erro)
 - **vai direto ao ponto**
 
 </div>
@@ -131,7 +215,7 @@ Sem contexto persistente, o agente **paga pedágio** toda vez que toca no projet
 <v-click>
 
 <div class="pt-6 text-center text-xl">
-Esse pedágio, multiplicado por cada dev × cada tarefa × cada dia = o estouro do mês.
+Multiplicado por cada dev, cada tarefa, cada dia: o agente redescobre o mesmo projeto centenas de vezes. Um CLAUDE.md resolve isso uma vez.
 </div>
 
 </v-click>
@@ -142,7 +226,7 @@ layout: section
 
 # 2. Pilar 1 — Especificar antes
 
-Spec-Driven: a maior alavanca de ROI
+Spec-Driven: eliminar ambiguidade antes que o agente escreva uma linha
 
 ---
 
@@ -150,18 +234,20 @@ Spec-Driven: a maior alavanca de ROI
 
 Sem contexto, o agente **descobre o que você quer** antes de fazer qualquer coisa.
 
-```mermaid {scale: 0.62}
+```mermaid {scale: 0.55}
 flowchart LR
   P["'o endpoint\ntá quebrando'"] --> D1[explora\narquivos]
   D1 --> D2[pergunta\nqual erro]
   D2 --> D3[você responde\n+tokens]
-  D3 --> D4[abordagem\nerrada]
+  D3 --> D3b["contexto inflado\narquivos irrelevantes\njá lidos — cada\nturno fica mais caro"]
+  D3b --> D4[abordagem\nerrada]
   D4 --> R["... várias rodadas ...\n✓ resultado"]
-  style D1 fill:#fee,stroke:#c33
-  style D2 fill:#fee,stroke:#c33
-  style D3 fill:#fee,stroke:#c33
-  style D4 fill:#fee,stroke:#c33
-  style R fill:#efe,stroke:#3a3
+  style D1 fill:#fee,stroke:#c33,color:#333
+  style D2 fill:#fee,stroke:#c33,color:#333
+  style D3 fill:#fee,stroke:#c33,color:#333
+  style D3b fill:#fee,stroke:#c33,stroke-width:3px,color:#333
+  style D4 fill:#fee,stroke:#c33,color:#333
+  style R fill:#efe,stroke:#3a3,color:#333
 ```
 
 <v-click>
@@ -181,13 +267,13 @@ Cada caixa vermelha = tokens que não precisavam existir.
 ### ❌ Antes
 
 ```
-o endpoint de transferência tá dando erro
+o endpoint de transferência está dando erro
 ```
 
 <div class="pt-2 text-sm opacity-80">
 
-→ O agente explora o projeto, pede o stack trace,
-tenta duas abordagens. Gasta ~3× mais tokens.
+→ O agente explora arquivos, pergunta o que você já sabe,
+testa caminhos que poderiam ter sido evitados — tokens gastos desnecessariamente.
 
 </div>
 
@@ -199,9 +285,9 @@ tenta duas abordagens. Gasta ~3× mais tokens.
 
 ```
 POST /api/v2/transferencias retorna 500
-quando valorCentavos = 0.
+quando ValorCentavos = 0.
 
-Stack trace em handler.ts:47.
+Stack trace em TransferenciaHandler.cs:47.
 Esperado: 422 com mensagem de validação.
 Não altere a camada de repositório.
 ```
@@ -232,8 +318,8 @@ adiciona paginação na listagem de transações
 
 <div class="pt-2 text-sm opacity-80">
 
-→ O agente inventa o estilo de paginação.
-Você corrige. Ele refaz. 2–3 rodadas desnecessárias.
+→ O agente inventa o estilo de paginação, você corrige,
+ele refaz — novamente rodadas de iteração, tool calling, reasoning que poderiam ter sido evitados.
 
 </div>
 
@@ -249,10 +335,10 @@ GET /api/v2/transacoes.
 
 Parâmetros: cursor (string, opcional),
 pageSize (int, default 20, max 100).
-nextCursor: null quando sem mais páginas.
+nextCursor: null quando não há mais páginas.
 
 Segue o padrão de /api/v2/extratos.
-Não altere o schema do banco.
+Não altere o schema — sem migrations.
 ```
 
 <div class="pt-2 text-sm opacity-80">
@@ -294,8 +380,9 @@ coisas que você não ligava.
 ### ✅ Depois
 
 ```
-Revisa src/services/pagamento.ts focando em:
-1. race conditions no updateSaldo
+Revisa Application/Services/PagamentoService.cs
+focando em:
+1. race conditions no AtualizarSaldo
 2. se os retries respeitam idempotência
 3. se logs expõem dados PII
 
@@ -331,7 +418,7 @@ Quatro ingredientes que eliminam o loop de descoberta:
 
 <div class="pt-6 mt-4 border-t border-gray-300">
 
-> Você não precisa escrever um ensaio. Quatro linhas com esses quatro pontos já evitam a maioria dos loops.
+> O que o agente não sabe, ele descobre — e você paga por essa descoberta.
 
 </div>
 
@@ -351,8 +438,8 @@ Se você não consegue descrever o resultado esperado,<br/>o agente também não
 <v-click>
 
 <div class="text-xl opacity-80 pt-4">
-Especifique primeiro. Execute depois.<br/>
-Essa ordem salva tokens, tempo e sanidade.
+Spec clara → agente propõe um plano → você valida → agente executa.<br/>
+O custo de ajustar um plano de texto é baixo.<br/>O custo de desfazer uma refatoração que foi na direção errada, não.
 </div>
 
 </v-click>
@@ -450,6 +537,41 @@ Trabalhando em `infrastructure/`? O Claude puxa o CLAUDE.md de lá junto com o d
 
 ---
 
+# CLAUDE.md na prática — exemplo real
+
+Um arquivo construído ao longo de semanas de uso. Os pontos que sobreviveram:
+
+```markdown
+# Restrições de ambiente
+- Sem acesso `sudo` — não tente instalar dependências globais
+- Ambiente: devcontainer (.NET 8, sem acesso à rede externa)
+
+# Convenções que o agente precisa respeitar
+- ...
+
+# O que não tocar
+- ...
+
+# Onde buscar o quê
+- Detalhes de autenticação: docs/auth.md
+- Contrato da API: openapi/spec.yaml
+```
+
+<v-click>
+
+<div class="pt-4 text-center text-xl">
+
+Cada linha aqui representa uma redescoberta que aconteceu uma vez — e nunca mais vai acontecer.
+
+</div>
+
+</v-click>
+
+<!-- SUBSTITUIR pelo conteúdo real do CLAUDE.md — remover o que for específico do projeto,
+     manter estrutura, restrições de ambiente e convenções compartilháveis -->
+
+---
+
 # Rico o bastante, enxuto o bastante
 
 <div class="grid grid-cols-2 gap-6 pt-2">
@@ -493,8 +615,9 @@ O CLAUDE.md é imposto fixo: cobrado em toda sessão.<br/>Mantenha-o como um **�
 <v-clicks>
 
 - Rode `/init` — o Claude gera um rascunho lendo o projeto
-- Edite: corte o ruído, adicione os comandos e as 3–4 regras de "não faça"
-- Commite junto com o código — é contexto **compartilhado pelo time** (todo dev se beneficia)
+- Edite: corte o ruído, adicione os comandos, regras de "não faça", limitações."
+- Adicione um `.claudeignore` — exclui `dist/`, `node_modules/`, binários e arquivos gerados dos greps; o agente para de explorar o que não tem sentido ler
+- Commite os dois junto com o código — é contexto **compartilhado pelo time** (todo dev se beneficia)
 - Refine quando notar o agente "redescobrindo" algo: aquilo virou linha no CLAUDE.md
 
 </v-clicks>
@@ -504,6 +627,43 @@ O CLAUDE.md é imposto fixo: cobrado em toda sessão.<br/>Mantenha-o como um **�
 <div class="pt-6 text-center text-xl">
 
 Cada redescoberta que você vê é um candidato a virar uma linha aqui.
+
+</div>
+
+</v-click>
+
+---
+
+# .claudeignore — exemplo para .NET
+
+O agente não perde tempo varrendo o que nunca vai precisar ler:
+
+```
+# build
+bin/
+obj/
+
+# NuGet
+packages/
+*.nupkg
+
+# gerados
+*.Designer.cs
+*.g.cs
+*.generated.cs
+**/Migrations/*.cs
+
+# IDE / tooling
+.vs/
+TestResults/
+coverage/
+```
+
+<v-click>
+
+<div class="pt-4 text-center text-xl">
+
+Commite junto com o CLAUDE.md — todo dev do time herda o mesmo filtro sem configurar nada.
 
 </div>
 
@@ -607,7 +767,7 @@ layout: section
 
 # 5. Higiene de sessão
 
-Vitórias de eficiência que não custam nada
+Ganhos de eficiência que não custam nada
 
 ---
 
@@ -627,7 +787,7 @@ Cada turno reenvia todo o histórico. Arrastar a tarefa B dentro da sessão chei
 
 <div class="pt-6 text-center text-xl">
 
-É o hábito de maior ROI por ser literalmente um comando.
+É o hábito de maior retorno: custa um comando e barateia todos os turnos seguintes.
 
 </div>
 
@@ -659,7 +819,68 @@ Você corrige a **direção** antes de qualquer edição — barato
 
 </div>
 
-<!-- EXEMPLO REAL (opcional): se o time tem um caso onde o agente saiu codando a coisa errada, esse é o slide pra mencionar de leve. -->
+<v-click>
+
+<div class="pt-6 text-center text-xl">
+
+Isso funciona porque a spec já estava clara — o agente sabe o suficiente para propor algo concreto.
+
+</div>
+
+</v-click>
+
+---
+
+# Plan mode — o que aparece na prática
+
+<div class="grid grid-cols-2 gap-6 pt-2">
+
+<div class="border border-gray-400 rounded-lg p-4 text-sm">
+
+**Você escreve:**
+
+```
+Adiciona validação: ValorCentavos deve ser > 0
+em POST /api/v2/transferencias.
+Retorna 422 com "Valor deve ser positivo".
+Arquivo: Application/UseCases/TransferenciaUseCase.cs
+Não altere testes existentes.
+```
+
+</div>
+
+<div v-click class="border border-blue-400 rounded-lg p-4 text-sm">
+
+**O agente propõe (sem tocar no código):**
+
+```
+Plano de execução:
+
+1. Localizar método Handle em
+   TransferenciaUseCase.cs
+2. Adicionar guard clause antes
+   da chamada ao repositório
+3. Retornar 422 com a mensagem
+   especificada
+4. Verificar padrão de erro do
+   projeto para validações
+
+Aguardando aprovação.
+```
+
+</div>
+
+</div>
+
+<v-click>
+
+<div class="pt-4 text-center text-xl">
+
+Você lê, ajusta a direção se precisar — e só então o agente escreve código.
+
+</div>
+
+</v-click>
 
 ---
 
@@ -897,7 +1118,7 @@ layout: section
 
 # 8. Roteamento de modelo
 
-A maior alavanca de custo do time
+A decisão que mais pesa no custo do time
 
 ---
 
@@ -1019,10 +1240,10 @@ O essencial num cartão
 - ✅ **Especifique antes** — contexto, tarefa, resultado esperado, restrições. Se não dá pra descrever, o agente não adivinha.
 - ✅ **CLAUDE.md enxuto e em camadas** — o agente já chega sabendo; índice, não enciclopédia.
 - ✅ **Skills pro que é procedimento** — carrega só quando usa.
-- ✅ **`/clear` entre tarefas, plan mode antes das grandes** — vitórias de graça.
+- ✅ **`/clear` entre tarefas, plan mode antes das grandes** — ganhos de graça.
 - ✅ **MCP que a tarefa pede, desligue o resto** — cuidado com o schema invisível.
 - ✅ **Sub-agent pra fan-out e trabalho isolado** — não pra coisinha rápida.
-- ✅ **Especifique no forte, execute no barato** — a maior alavanca de custo.
+- ✅ **Especifique no forte, execute no barato** — onde o time mais economiza.
 
 </v-clicks>
 
