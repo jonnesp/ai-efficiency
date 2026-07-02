@@ -23,7 +23,7 @@ MCP (Model Context Protocol) liga o Claude a sistemas externos — GitHub, Jira,
 
 # O imposto que você não vê
 
-Cada servidor MCP injeta as **definições das suas ferramentas (schemas)** no contexto — em **todo turno**, mesmo que você não use nenhuma delas naquela conversa.
+Cada servidor MCP **habilitado** injeta o nome de cada ferramenta e uma instrução curta do servidor no contexto — em **todo turno**, mesmo que você não use nenhuma delas naquela conversa. (O schema completo de cada tool é a parte mais pesada — essa vem depois, sob demanda.)
 
 <div class="grid grid-cols-2 gap-8 pt-4">
 
@@ -31,7 +31,7 @@ Cada servidor MCP injeta as **definições das suas ferramentas (schemas)** no c
 
 ### 1 MCP habilitado
 
-Schema das ferramentas → X tokens em todo turno
+Nomes + instrução → X tokens em todo turno
 
 </div>
 
@@ -39,7 +39,7 @@ Schema das ferramentas → X tokens em todo turno
 
 ### 10 MCPs habilitados
 
-10× schemas → N tokens **antes de você escrever qualquer coisa**
+10× nomes + instruções → N tokens **antes de você escrever qualquer coisa**
 
 </div>
 
@@ -49,7 +49,7 @@ Schema das ferramentas → X tokens em todo turno
 
 <div class="pt-6 text-center text-xl">
 
-Ligar dez MCPs "por garantia" é o mesmo erro do CLAUDE.md gigante:<br/>capacidade que você paga sempre e usa quase nunca.
+Ligar dez MCPs "por garantia" é o mesmo erro do CLAUDE.md gigante:<br/>capacidade que você paga sempre, mesmo que leve, e usa quase nunca.
 
 </div>
 
@@ -67,7 +67,7 @@ Ligar dez MCPs "por garantia" é o mesmo erro do CLAUDE.md gigante:<br/>capacida
 
 `WebFetch` — leve, traz o conteúdo e pronto.
 
-Quase zero overhead de schema.
+Sem MCP, sem schema extra pra carregar.
 
 </div>
 
@@ -94,6 +94,142 @@ Use a ferramenta pesada só quando a tarefa pede interação real.<br/>Para ler,
 </v-click>
 
 ---
+
+# Curiosidade: ler leve não é ideia da Anthropic
+
+O tradeoff "buscar conteúdo direto vs. abrir um navegador completo" não é exclusividade do Claude — é um padrão que o mercado inteiro de agentes convergiu.
+
+<v-clicks>
+
+- Praticamente todo assistente de código com acesso à web tem os dois modos: um fetch leve (pega a página, extrai o texto) e um MCP/plugin de browser automation (Playwright, Puppeteer) pra quando precisa de interação real
+- A ideia por trás é sempre a mesma: não pague o custo de um navegador inteiro — schemas, sessão, DOM — só pra ler um artigo ou uma doc
+
+</v-clicks>
+
+<v-click>
+
+<div class="pt-6 text-center text-xl">
+
+E o CLAUDE.md pode reforçar isso: uma instrução como<br/>
+<code>"prefira WebFetch a MCPs de browser; só use automação se precisar interagir"</code><br/>
+já orienta o agente a escolher a via mais barata por padrão.
+
+</div>
+
+</v-click>
+
+---
+
+# O gatilho, na prática
+
+"Habilitado" não quer dizer "schema sempre no contexto". São **dois portões** diferentes.
+
+<div class="grid grid-cols-2 gap-6 pt-4">
+
+<div class="border border-blue-400 rounded-lg p-4">
+
+### 1. Ligar o servidor
+
+Decisão manual, feita antes da tarefa — por comando ou por configuração salva no projeto.
+
+Servidor desligado = custo zero. A tarefa não liga nada sozinha.
+
+</div>
+
+<div class="border border-orange-400 rounded-lg p-4">
+
+### 2. Carregar o schema
+
+De servidor **ligado**, só o nome da ferramenta e uma instrução curta entram no contexto no início da sessão.
+
+O schema completo de cada tool só é puxado quando o agente, durante a tarefa, decide que precisa dela.
+
+</div>
+
+</div>
+
+<v-click>
+
+<div class="pt-6 text-center text-xl">
+
+"Ligado" cobra todo turno. "Usado" cobra por tarefa.<br/>
+Você só decide o primeiro — e é ele que compensa cortar.
+
+</div>
+
+</v-click>
+
+---
+
+# Onde essa decisão fica
+
+`/mcp` liga e desliga na hora, dentro da sessão. Pra deixar fixo no projeto, a lista vai no `settings.json`:
+
+```json
+{
+  "enabledMcpjsonServers": ["github", "postgres"],
+  "disabledMcpjsonServers": ["figma", "shopify", "blender"]
+}
+```
+
+<v-click>
+
+<div class="pt-4 text-lg">
+
+Comitado no repo, o time inteiro herda a mesma escolha — ninguém precisa lembrar de desligar nada a cada sessão.
+
+</div>
+
+</v-click>
+
+---
+
+# Exemplo: seis MCPs disponíveis, três fazem sentido
+
+Projeto .NET, versionado em Git. Dá pra ligar MCP de qualquer coisa "porque um dia pode ser útil" — mas nesse projeto, só três têm o que fazer.
+
+<div class="grid grid-cols-2 gap-6 pt-2 text-sm">
+
+<div class="border border-red-400 rounded-lg p-3">
+
+### ❌ Ligado tudo
+
+- ✅ Git/GitHub
+- ✅ Azure DevOps
+- ✅ Banco de dados (SQL Server)
+- ⚠️ Figma — sem handoff de design
+- ⚠️ Shopify — não é loja virtual
+- ⚠️ Blender — sem asset 3D aqui
+
+<div class="pt-2 text-xs opacity-70">6 servidores → 6× nome+instrução em todo turno</div>
+
+</div>
+
+<div class="border border-green-500 rounded-lg p-3">
+
+### ✅ Só o que serve
+
+- Git/GitHub
+- Azure DevOps
+- Banco de dados (SQL Server)
+
+<div class="pt-2 text-xs opacity-70">Nada de útil ficou de fora — só cortou o que nunca ia ser chamado.</div>
+
+</div>
+
+</div>
+
+<v-click>
+
+<div class="pt-4 text-center text-lg">
+
+Essa escolha é feita uma vez, ao configurar o projeto — não a cada prompt.
+
+</div>
+
+</v-click>
+
+---
 layout: center
 class: text-center
 ---
@@ -102,7 +238,7 @@ class: text-center
 
 <div class="text-3xl font-bold pt-8 pb-6 leading-snug">
 
-Habilite o MCP que a <strong>tarefa</strong> pede.<br/>Desligue o resto.
+Habilite os MCPs que o <strong>projeto</strong> realmente usa.<br/>Desligue o resto.
 
 </div>
 
@@ -110,7 +246,7 @@ Habilite o MCP que a <strong>tarefa</strong> pede.<br/>Desligue o resto.
 
 <div class="text-xl opacity-80 pt-4">
 
-Poder sob demanda, não poder por garantia.
+Decisão de configuração, do contrário o contexto pode ser maior a cada prompt desnecessariamente.
 
 </div>
 

@@ -20,6 +20,7 @@ Palestra em **Slidev** (Vue + Markdown) sobre uso eficiente de tokens com IA. De
 - Separador de slide: `---` em linha própria; frontmatter por slide entre `---`.
 - Animações: `<v-click>` / `<v-clicks>`. Layout via frontmatter (`layout: section`, `layout: center`).
 - Tom: direto, técnico-acessível, sem hype. Exemplos em .NET/C# quando ilustrarem código.
+- Evite vocabulário que soa gerado por IA — "curadoria", "alavancar", "sinergia", "otimizar", "potencializar", "holístico" e afins. Escreva como um dev explicando pra outro dev, não como texto de marketing. Se uma frase soar bonita demais pra sair da boca de alguém no dia a dia, reescreva mais seca.
 - Preços/números de tokens: conferir antes de alterar — o deck cita valores reais.
 
 # Ao editar

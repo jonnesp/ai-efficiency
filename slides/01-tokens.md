@@ -131,7 +131,7 @@ Sem contexto persistente, o agente **paga pedágio** toda vez que toca no projet
 
 ### ❌ Sem CLAUDE.md
 - `grep` na estrutura
-- lê 5 arquivos pra "se localizar"
+- lê diversos arquivos pra "se localizar"
 - deduz convenções do zero
 - **...a cada tarefa**
 

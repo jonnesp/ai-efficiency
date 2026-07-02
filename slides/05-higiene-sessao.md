@@ -123,13 +123,21 @@ Você lê, ajusta a direção se precisar — e só então o agente escreve cód
 
 # Quando a sessão precisa continuar longa
 
-`/compact` resume a conversa e segue em frente, em vez de só inflar. O Claude Code também compacta sozinho perto do limite.
+Tarefa longa, mas ainda é o mesmo assunto? Não dá pra usar `/clear`. Use `/compact` **você mesmo**, sem esperar o limite — o Claude Code também compacta sozinho perto do limite, mas aí você não escolhe o que sobra.
+
+<v-clicks>
+
+- `/compact` sozinho: resumo genérico, decide por conta própria o que é relevante
+- `/compact <instrução>`: você direciona — ex. `/compact mantenha as decisões de arquitetura e os erros já descartados, descarte trechos de código já aplicados`
+- Rode antes de virar de fase (ex. terminou o plano, vai começar a implementar) — resume o que já foi decidido e libera espaço pro que vem
+
+</v-clicks>
 
 <v-click>
 
 <div class="pt-6 text-center text-xl">
 
-`/clear` é o hábito; plan mode é o freio; compactação é o seguro.<br/>**Três comandos, zero custo.**
+`/clear` zera o contexto; plan mode trava edição até aprovação; compactação dirigida preserva o que importa.<br/>**Três comandos, zero custo.**
 
 </div>
 

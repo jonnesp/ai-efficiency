@@ -162,6 +162,12 @@ O CLAUDE.md é imposto fixo: cobrado em toda sessão.<br/>Mantenha-o como um **�
 
 </v-click>
 
+<div class="pt-4 text-xs opacity-60">
+
+Apontar onde buscar em vez de carregar tudo é a mesma ideia por trás do **RAG**: recuperar o trecho certo na hora, não despejar a base inteira no contexto. → <code>anthropic.com/news/contextual-retrieval</code>
+
+</div>
+
 ---
 
 # Começar é barato
