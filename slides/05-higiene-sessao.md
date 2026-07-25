@@ -142,3 +142,77 @@ Tarefa longa, mas ainda é o mesmo assunto? Não dá pra usar `/clear`. Use `/co
 </div>
 
 </v-click>
+
+---
+
+# Limpar também custa — escolha a ferramenta certa
+
+Os comandos são baratos como hábito, mas nem todos são de graça. `/compact` dispara uma requisição extra que **relê o histórico inteiro e gera o resumo** — tokens de output + tempo. `/rewind` não gera nada: trunca de volta a um turno anterior cujo prefixo **já está em cache**.
+
+<div class="pt-2">
+
+| Comando | O que faz | Custo | Quando |
+| --- | --- | --- | --- |
+| `/clear` | Zera tudo | Barato | Troquei de assunto, não preciso do anterior |
+| `/rewind` | Volta a um turno anterior | Barato (prefixo já cacheado) | Fui por um caminho que quero abandonar |
+| `/compact` | Troca o histórico por um resumo | Paga a **geração** do resumo | Mesmo assunto, muito acumulado que não vou mais reler |
+
+</div>
+
+<v-click>
+
+<div class="pt-4 text-center text-xl">
+
+A melhor otimização é **não carregar** o que não vai usar.<br/>Analogia .NET: não alocar o objeto grande é melhor que rodar o GC pra recolher depois — o GC (compact) não é de graça.
+
+</div>
+
+</v-click>
+
+---
+
+# O que invalida o cache (e zera a economia)
+
+O cache read barato depende do **prefixo** ficar estável. Mexeu no começo da requisição, o resto recomputa — o próximo turno vem caro.
+
+<div class="grid grid-cols-2 gap-8 pt-2">
+
+<div>
+
+### 💥 Derruba o cache
+
+- Trocar de **modelo** (inclui `opusplan` a cada plan mode)
+- Mudar **effort level**
+- Ligar **fast mode**
+- **MCP** conecta/desconecta (se as tools estão no prefixo)
+- Plugin **com MCP** ligado/desligado
+- **Negar uma tool** inteira (`Bash`, `WebFetch`…)
+- `/compact` (reconstrói o histórico)
+- **Upgrade** do Claude Code
+
+</div>
+
+<div v-click>
+
+### ✅ Não mexe no cache
+
+- Editar arquivos do repo
+- Editar CLAUDE.md no meio (nem aplica)
+- Trocar output style / permission mode
+- Invocar skill ou command
+- `/recap`, `/rewind`
+- Abrir um sub-agent
+
+</div>
+
+</div>
+
+<v-click>
+
+<div class="pt-4 text-center text-lg">
+
+⚠️ Alguns acontecem **sem você pedir**: um MCP reconectando sozinho ou um upgrade derrubam o cache. É a conta subindo "do nada" — quase sempre é isso.
+
+</div>
+
+</v-click>

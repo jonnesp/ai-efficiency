@@ -66,6 +66,52 @@ Mas atenção ao volume — numa sessão longa, o cache read relê **tudo, a cad
 
 ---
 
+# A esteira: o que é read, write e input num turno
+
+A cada turno a requisição tem sempre a mesma forma. Só a **ponta** é nova:
+
+```
+Turno N:
+[========== cache read (0,1×) ==========][ write (1,25×) ][ input (1×) ]
+ system + tools + CLAUDE.md + histórico    delta novo        sua msg
+ (tudo que já estava selado)               sendo selado      de agora
+```
+
+<div class="grid grid-cols-3 gap-4 pt-4 text-sm">
+
+<div class="border border-green-500 rounded-lg p-3">
+
+**🟢 cache read** — o prefixo que já existia. A **maior** fatia e a mais barata. Relido inteiro todo turno.
+
+</div>
+
+<div class="border border-blue-400 rounded-lg p-3">
+
+**🔵 cache write** — só o **delta** desde a última selagem. Cada pedaço passa aqui **uma vez** na vida.
+
+</div>
+
+<div class="border border-gray-400 rounded-lg p-3">
+
+**⚪ input 1×** — só a sua **mensagem nova**. A ponta ainda não selada. Sempre pequena.
+
+</div>
+
+</div>
+
+<v-click>
+
+<div class="pt-4 text-center text-lg">
+
+A ponta escorrega pra esquerda a cada turno: sua msg de hoje é **input** → amanhã vira **write** → depois **read pra sempre**.<br/>
+<span class="opacity-80">É por isso que, no `/usage`, o **read domina** e o input fica minúsculo.</span>
+
+</div>
+
+</v-click>
+
+---
+
 # Caso real — esta própria apresentação
 
 Construí estes slides conversando e ajustando com a IA. Muitas iterações na mesma sessão → o `slides.md` crescia e era **relido a cada turno**.
