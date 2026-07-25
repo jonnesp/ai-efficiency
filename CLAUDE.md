@@ -7,6 +7,7 @@ Palestra em **Slidev** (Vue + Markdown) sobre uso eficiente de tokens com IA. De
 - `slides.md` — **índice**: frontmatter global + capa/problema/sumário + imports `src:` das seções. Edite aqui só a intro ou a ordem das seções.
 - `slides/NN-nome.md` — uma seção por arquivo. Para ajustar uma seção, edite só o arquivo dela (evita reler o deck inteiro).
 - `specs/` — rascunhos de conteúdo.
+- `bench/` — material de apoio: benchmark do custo real de uma skill (com vs. sem). Comece por `bench/README.md`. Gera os números que faltam no slide de Skills.
 - `dist/`, `node_modules/` — gerados, ignorados. Não leia nem edite.
 
 # Comandos
